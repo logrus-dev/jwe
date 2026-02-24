@@ -1,50 +1,105 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+  Sync Impact Report
+  ==================
+  Version change: (none) → 1.0.0 (initial ratification)
+
+  Added sections:
+    - Core Principles (3 principles: Client-Side Sovereignty, Static Deployment, Simplicity)
+    - Technology Constraints
+    - Development Workflow
+    - Governance
+
+  Modified principles: N/A (initial)
+  Removed sections:    N/A (initial)
+
+  Templates reviewed:
+    ✅ .specify/templates/plan-template.md     — Constitution Check section compatible; no changes needed
+    ✅ .specify/templates/spec-template.md     — Scope/requirements alignment verified; no changes needed
+    ✅ .specify/templates/tasks-template.md    — Task categories compatible with current principles; no changes needed
+    ✅ .specify/templates/agent-file-template.md — No outdated agent-specific references found
+    ✅ .claude/commands/speckit.plan.md        — Generic; no CLAUDE-only constraints; no changes needed
+    ✅ .claude/commands/speckit.specify.md     — Generic; no outdated references; no changes needed
+
+  Deferred TODOs: None
+-->
+
+# JWE Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Client-Side Sovereignty
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+All encryption and decryption operations MUST execute entirely within the browser.
+No secret material — whether plaintext, ciphertext, or cryptographic key — is ever
+transmitted to or processed by any server, third-party service, or external runtime.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+**Rationale**: The product's trust model depends on users retaining sole custody of
+their secrets. Any server-side processing would fundamentally undermine that promise
+and cannot be introduced for convenience or performance reasons.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### II. Static Deployment
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+The deployed application MUST consist solely of static files (HTML, CSS, JS, and
+assets) that can be served by any static file host, CDN, or `file://` URL without
+a server-side runtime. No Node.js, Python, Go, or other runtime MAY be required
+for the application to function after build.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+**Rationale**: Static deployment enforces Principle I by construction, eliminates
+operational attack surface, and maximises availability. Build tooling is permitted
+during development but MUST NOT be a runtime dependency.
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+### III. Simplicity (YAGNI)
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+The codebase MUST contain only what is needed for the current, clearly defined
+requirements. Speculative abstractions, unused configuration hooks, plugin
+architectures, and "future-proof" layers are PROHIBITED until a concrete, present
+need is demonstrated and documented.
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+Every abstraction introduced MUST be justified in the plan's Complexity Tracking
+table. Three direct lines of code are preferable to a premature helper function.
+
+**Rationale**: Security-sensitive code must be auditable. Every unnecessary
+abstraction layer increases cognitive load and attack surface. Complexity MUST be
+earned, not anticipated.
+
+## Technology Constraints
+
+- **Encryption standard**: JWE (JSON Web Encryption, RFC 7516). Implementations
+  MUST use the browser-native Web Crypto API wherever it provides the required
+  algorithm; third-party cryptographic libraries require explicit justification.
+- **Dependencies**: Third-party dependencies MUST be minimised. Each dependency
+  MUST be reviewed for security and supply-chain risk before adoption.
+- **Build output**: The build step MUST produce a self-contained static bundle.
+  No server-rendered HTML, SSR hydration, or backend-for-frontend is permitted.
+- **Algorithm selection**: Only algorithms with current NIST or IETF approval
+  MAY be used. Weak or deprecated algorithms (e.g., RSA-PKCS1v1.5, AES-CBC
+  without authentication) are PROHIBITED.
+
+## Development Workflow
+
+- Features begin with a user story in `spec.md` before any code is written.
+- Every PR MUST be verified to produce a purely static build; PRs introducing
+  a server-side runtime dependency MUST NOT be merged.
+- Complexity violations (anything that contradicts Principle III) MUST be
+  documented in the plan's Complexity Tracking table with explicit justification
+  before the PR can be merged.
+- Security-sensitive changes (algorithm selection, key derivation, storage
+  mechanism, CSP policy) MUST include a rationale comment referencing the
+  relevant RFC, NIST publication, or OWASP guideline.
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+This constitution supersedes all other project conventions. Amendments MUST:
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+1. Increment `CONSTITUTION_VERSION` according to the following policy:
+   - **MAJOR**: Principle removal, redefinition, or backward-incompatible governance change.
+   - **MINOR**: New principle or section added; material expansion of existing guidance.
+   - **PATCH**: Clarifications, wording fixes, non-semantic refinements.
+2. Update `LAST_AMENDED_DATE` to the ISO date of the amendment (YYYY-MM-DD).
+3. Propagate any structural changes to dependent templates in `.specify/templates/`.
+4. Include a migration plan if existing features must be updated to comply.
+
+All PRs MUST be checked against this constitution before merge. The plan's
+Complexity Tracking table is the authorised record of justified exceptions.
+
+**Version**: 1.0.0 | **Ratified**: 2026-02-23 | **Last Amended**: 2026-02-23
