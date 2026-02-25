@@ -21,7 +21,7 @@ import { DynamicForm } from './components/DynamicForm';
 import { PublicKeyInput, type KeyState } from './components/PublicKeyInput';
 import { EncryptedOutput } from './components/EncryptedOutput';
 import { parseSchema, deriveUiSchema, type SchemaResult } from './utils/schemaUtils';
-import { readUrlParams } from './utils/urlParams';
+import { readUrlParams, decodeBase64UrlParam } from './utils/urlParams';
 import { validateAndImportKey } from './utils/encrypt';
 import type { UiSchema } from '@rjsf/utils';
 
@@ -63,28 +63,38 @@ export default function App() {
     const errors: { schema?: string; key?: string } = {};
 
     if (params.schema) {
-      const result = parseSchema(params.schema);
-      if (result.isValid) {
-        setSchemaRaw(params.schema);
-        setSchemaState(result);
-        setUiSchema(deriveUiSchema(result.parsed!));
-        setFormData({});
+      const schemaDecode = decodeBase64UrlParam(params.schema);
+      if (schemaDecode.error !== null) {
+        errors.schema = schemaDecode.error;
       } else {
-        errors.schema = result.error ?? 'Invalid schema in URL parameter';
+        const result = parseSchema(schemaDecode.value);
+        if (result.isValid) {
+          setSchemaRaw(schemaDecode.value);
+          setSchemaState(result);
+          setUiSchema(deriveUiSchema(result.parsed!));
+          setFormData({});
+        } else {
+          errors.schema = result.error ?? 'Invalid schema in URL parameter';
+        }
       }
     }
 
     if (params.key) {
-      validateAndImportKey(params.key)
-        .then(({ cryptoKey }) => {
-          setKeyState({ raw: params.key!, cryptoKey, isValid: true, error: null });
-        })
-        .catch((e: Error) => {
-          setUrlErrors((prev) => ({
-            ...prev,
-            key: e.message ?? 'Invalid key in URL parameter',
-          }));
-        });
+      const keyDecode = decodeBase64UrlParam(params.key);
+      if (keyDecode.error !== null) {
+        setUrlErrors((prev) => ({ ...prev, key: keyDecode.error }));
+      } else {
+        validateAndImportKey(keyDecode.value)
+          .then(({ cryptoKey }) => {
+            setKeyState({ raw: keyDecode.value, cryptoKey, isValid: true, error: null });
+          })
+          .catch((e: Error) => {
+            setUrlErrors((prev) => ({
+              ...prev,
+              key: e.message ?? 'Invalid key in URL parameter',
+            }));
+          });
+      }
     }
 
     if (Object.keys(errors).length > 0) {

@@ -6,6 +6,8 @@ Auto-generated from all feature plans. Last updated: 2026-02-23
 - TypeScript 5.x + GitHub Actions (`actions/setup-node@v4` v4, `Azure/static-web-apps-deploy@v1`), Vite 6.x (existing build tool), ESLint + `@typescript-eslint` (new, for lint gate) (001-azure-static-deploy)
 - N/A — static files on Azure CDN (001-azure-static-deploy)
 - TypeScript 5.x + React 18.x (useState, useEffect — already in use) (001-url-param-hide-steps)
+- TypeScript 5.x + React 18.x, browser-native `atob()` + `TextDecoder` (no new packages) (001-base64url-params)
+- N/A (client-side SPA, no persistence) (001-base64url-params)
 
 - **Language**: TypeScript 5.x
 - **Runtime/Framework**: React 18.x (client-side SPA)
@@ -60,10 +62,10 @@ npm run lint          # ESLint
 - No `any` types — use `unknown` + type guards where needed
 
 ## Recent Changes
+- 001-base64url-params: Added TypeScript 5.x + React 18.x, browser-native `atob()` + `TextDecoder` (no new packages)
 - 001-url-param-hide-steps: Added TypeScript 5.x + React 18.x (useState, useEffect — already in use)
 - 001-azure-static-deploy: Added TypeScript 5.x + GitHub Actions (`actions/setup-node@v4` v4, `Azure/static-web-apps-deploy@v1`), Vite 6.x (existing build tool), ESLint + `@typescript-eslint` (new, for lint gate)
 
-- **001-schema-jwe-form** (2026-02-23): Initial feature — schema-driven JWE form
   encryptor. Full tech stack established: React + Vite + RJSF + jose + Mantine.
 
 <!-- MANUAL ADDITIONS START -->
